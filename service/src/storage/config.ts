@@ -54,7 +54,10 @@ export async function getOriginConfig() {
         !Number.isNaN(+process.env.SMTP_PORT) ? +process.env.SMTP_PORT : 465,
         process.env.SMTP_TSL === 'true',
         process.env.SMTP_USERNAME,
-        process.env.SMTP_PASSWORD))
+        process.env.SMTP_PASSWORD,
+        process.env.SMTP_FROM || process.env.SMTP_USERNAME,
+      ),
+    )
   }
   else {
     if (config.siteConfig.loginEnabled === undefined)
@@ -115,7 +118,6 @@ export async function getOriginConfig() {
 
   if (!isNotEmptyString(config.siteConfig.chatModels))
     config.siteConfig.chatModels = 'gpt-3.5-turbo,gpt-4-turbo-preview,gpt-4-vision-preview'
-
   return config
 }
 

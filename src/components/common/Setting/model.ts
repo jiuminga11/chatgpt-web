@@ -32,6 +32,7 @@ export class SiteConfig {
   chatModels?: string
   globalAmount?: number
   usageCountLimit?: boolean
+  showWatermark?: boolean
 }
 
 export class MailConfig {
@@ -40,6 +41,7 @@ export class MailConfig {
   smtpTsl?: boolean
   smtpUserName?: string
   smtpPassword?: string
+  smtpFrom?: string
 }
 export type TextAuditServiceProvider = 'baidu' //  | 'ali'
 
@@ -110,6 +112,16 @@ export class KeyConfig {
   }
 }
 
+export class UserPrompt {
+  _id?: string
+  title: string
+  value: string
+  constructor(title: string, value: string) {
+    this.title = title
+    this.value = value
+  }
+}
+
 export type APIMODEL = 'ChatGPTAPI' | 'ChatGPTUnofficialProxyAPI' | undefined
 
 export const apiModelOptions = ['ChatGPTAPI', 'ChatGPTUnofficialProxyAPI'].map((model: string) => {
@@ -120,7 +132,7 @@ export const apiModelOptions = ['ChatGPTAPI', 'ChatGPTUnofficialProxyAPI'].map((
   }
 })
 
-export const userRoleOptions = Object.values(UserRole).filter(d => isNaN(Number(d))).map((role) => {
+export const userRoleOptions = Object.values(UserRole).filter(d => Number.isNaN(Number(d))).map((role) => {
   return {
     label: role as string,
     key: role as string,

@@ -3,8 +3,8 @@ import type { Ref } from 'vue'
 import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import type { MessageReactive } from 'naive-ui'
-import { NAutoComplete, NButton, NInput, NSelect, NSlider, NSpace, NSpin, NUpload, UploadFileInfo, useDialog, useMessage } from 'naive-ui'
+import type { MessageReactive, UploadFileInfo } from 'naive-ui'
+import { NAutoComplete, NButton, NInput, NSelect, NSlider, NSpace, NSpin, NUpload, useDialog, useMessage } from 'naive-ui'
 import html2canvas from 'html2canvas'
 import { Message } from './components'
 import { useScroll } from './hooks/useScroll'
@@ -21,6 +21,7 @@ import {
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
 import IconPrompt from '@/icons/Prompt.vue'
+
 const Prompt = defineAsyncComponent(() => import('@/components/common/Setting/Prompt.vue'))
 
 let controller = new AbortController()
@@ -56,7 +57,7 @@ const currentChatModel = computed(() => nowSelectChatModel.value ?? currentChatH
 
 const currentNavIndexRef = ref<number>(-1)
 
-const isVisionModel = computed(() => currentChatModel.value && (currentChatModel.value?.includes('vision') || ['gpt-4-turbo', 'gpt-4-turbo-2024-04-09'].includes(currentChatModel.value)))
+const isVisionModel = computed(() => currentChatModel.value && (currentChatModel.value?.includes('vision') || ['gpt-4-turbo', 'gpt-4-turbo-2024-04-09'].includes(currentChatModel.value) || currentChatModel.value?.includes('gpt-4o')))
 
 let loadingms: MessageReactive
 let allmsg: MessageReactive
@@ -444,7 +445,7 @@ function handleDelete(index: number, fast: boolean) {
   if (loading.value)
     return
 
-if (fast === true) {
+  if (fast === true) {
     chatStore.deleteChatByUuid(+uuid, index)
   }
   else {
@@ -565,7 +566,7 @@ async function handleToggleUsingContext() {
 // 理想状态下其实应该是key作为索引项,但官方的renderOption会出现问题，所以就需要value反renderLabel实现
 const searchOptions = computed(() => {
   if (prompt.value.startsWith('/')) {
-    return promptTemplate.value.filter((item: { key: string }) => item.key.toLowerCase().includes(prompt.value.substring(1).toLowerCase())).map((obj: { value: any }) => {
+    return promptTemplate.value.filter((item: { title: string }) => item.title.toLowerCase().includes(prompt.value.substring(1).toLowerCase())).map((obj: { value: any }) => {
       return {
         label: obj.value,
         value: obj.value,
@@ -578,10 +579,10 @@ const searchOptions = computed(() => {
 })
 
 // value反渲染key
-const renderOption = (option: { label: string }) => {
+function renderOption(option: { label: string }) {
   for (const i of promptTemplate.value) {
     if (i.value === option.label)
-      return [i.key]
+      return [i.title]
   }
   return []
 }
@@ -642,7 +643,7 @@ onMounted(() => {
   }
 })
 
-watch(() => chatStore.active, (newVal, oldVal) => {
+watch(() => chatStore.active, () => {
   handleSyncChat()
 })
 
